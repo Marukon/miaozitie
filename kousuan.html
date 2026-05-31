@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>口算速练 - 喵字帖</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px 20px 16px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .header .nav-links {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .header .nav-link {
+            display: inline-block;
+            padding: 5px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .header .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* ===== 设置面板 ===== */
+        .setup-panel {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .hint {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 12px;
+            margin-bottom: 18px;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #856404;
+            line-height: 1.6;
+        }
+
+        .setup-section {
+            margin-bottom: 16px;
+        }
+
+        .setup-section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .setup-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .setup-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .setup-item label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .setup-item select {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+            color: #333;
+            appearance: auto;
+        }
+
+        .setup-item select:focus {
+            outline: none;
+            border-color: #f093fb;
+        }
+
+        .digits-config {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .digits-config select {
+            width: 80px;
+            padding: 8px 6px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            text-align: center;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .digits-config select:focus {
+            outline: none;
+            border-color: #f093fb;
+        }
+
+        .digits-config .op-symbol {
+            font-size: 20px;
+            font-weight: bold;
+            color: #f5576c;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .digits-preview {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #888;
+            text-align: center;
+        }
+
+        .btn-start {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            transition: all 0.3s;
+            margin-top: 6px;
+        }
+
+        .btn-start:hover {
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-start:active {
+            transform: scale(0.98);
+        }
+
+        /* ===== 答题区域 ===== */
+        .quiz-area {
+            display: none;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .quiz-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .quiz-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+        }
+
+        .quiz-stat-label {
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .quiz-stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .timer-value {
+            color: #f5576c;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .progress-bar-wrap {
+            width: 100%;
+            height: 5px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            transition: width 0.3s;
+        }
+
+        .quiz-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 20px 10px;
+            min-height: 140px;
+        }
+
+        .question-display {
+            font-size: 52px;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.3;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .question-display .op {
+            color: #f5576c;
+            margin: 0 6px;
+        }
+
+        .question-display .eq {
+            color: #aaa;
+            margin: 0 4px;
+        }
+
+        .answer-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333;
+            min-height: 62px;
+            min-width: 100px;
+            padding: 4px 16px;
+            border-bottom: 4px solid #f5576c;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            position: relative;
+        }
+
+        .answer-display .cursor-blink {
+            display: inline-block;
+            width: 3px;
+            height: 44px;
+            background: #f5576c;
+            margin-left: 2px;
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .answer-display.correct {
+            border-color: #28a745;
+            color: #28a745;
+            animation: pop 0.35s;
+        }
+
+        .answer-display.wrong {
+            border-color: #dc3545;
+            color: #dc3545;
+            animation: shake 0.35s;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .feedback {
+            font-size: 22px;
+            height: 32px;
+            line-height: 32px;
+            margin-top: 4px;
+        }
+
+        /* ===== 虚拟键盘 ===== */
+        .numpad {
+            padding: 8px 12px 12px;
+            background: #f0f0f3;
+            border-top: 1px solid #e0e0e0;
+            user-select: none;
+        }
+
+        .numpad-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .numpad-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .numpad-key {
+            flex: 1;
+            height: 56px;
+            border: none;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s;
+            background: white;
+            color: #333;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .numpad-key:active {
+            transform: scale(0.95);
+            background: #e8e8e8;
+            box-shadow: none;
+        }
+
+        .numpad-key.key-clear {
+            background: #fee2e2;
+            color: #dc3545;
+            font-size: 16px;
+        }
+
+        .numpad-key.key-clear:active {
+            background: #fcc;
+        }
+
+        .numpad-key.key-back {
+            background: #fff3cd;
+            color: #856404;
+            font-size: 20px;
+        }
+
+        .numpad-key.key-back:active {
+            background: #ffe69c;
+        }
+
+        .numpad-key.key-skip {
+            background: #e9ecef;
+            color: #6c757d;
+            font-size: 15px;
+        }
+
+        .numpad-key.key-skip:active {
+            background: #d6d8db;
+        }
+
+        .numpad-key.key-submit {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            font-size: 20px;
+        }
+
+        .numpad-key.key-submit:active {
+            opacity: 0.85;
+        }
+
+        .numpad-key.key-negative {
+            font-size: 20px;
+            background: #e8f4fd;
+            color: #0d6efd;
+        }
+
+        .numpad-key.key-negative:active {
+            background: #c5e3f6;
+        }
+
+        /* ===== 结果区域 ===== */
+        .result-area {
+            padding: 30px 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .result-emoji {
+            font-size: 64px;
+            margin-bottom: 10px;
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .result-cards {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 14px;
+            padding: 14px 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .result-card-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .result-card-value {
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .result-card-value.accuracy { color: #28a745; }
+        .result-card-value.time { color: #f5576c; }
+        .result-card-value.total { color: #667eea; }
+
+        .star-rating {
+            font-size: 32px;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+        }
+
+        .wrong-review {
+            text-align: left;
+            margin: 16px auto;
+            max-width: 400px;
+        }
+
+        .wrong-review h3 {
+            font-size: 15px;
+            color: #dc3545;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .wrong-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #fff5f5;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border-left: 3px solid #dc3545;
+        }
+
+        .wrong-question {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .wrong-answers {
+            font-size: 13px;
+        }
+
+        .wrong-answers .your-answer {
+            color: #dc3545;
+            text-decoration: line-through;
+            margin-right: 8px;
+        }
+
+        .wrong-answers .correct-answer {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .result-buttons button {
+            padding: 12px 28px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .result-buttons button:active {
+            transform: scale(0.97);
+        }
+
+        .btn-retry {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+
+        /* ===== 页脚 ===== */
+        .footer {
+            background: #f8f9fa;
+            padding: 14px;
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .footer a {
+            color: #f5576c;
+            text-decoration: none;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 520px) {
+            body { padding: 0; }
+            .container { border-radius: 0; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+            .header { border-radius: 0; padding: 16px 16px 12px; }
+            .header h1 { font-size: 1.5em; }
+            .header .nav-links { gap: 6px; }
+            .header .nav-link { padding: 4px 10px; font-size: 11px; }
+            .setup-panel { padding: 16px; flex: 1; }
+            .quiz-area { flex: 1; }
+            .quiz-body { padding: 12px 16px 8px; }
+            .question-display { font-size: 42px; }
+            .answer-display { font-size: 40px; min-height: 52px; }
+            .answer-display .cursor-blink { height: 36px; }
+            .numpad { padding: 6px 8px 10px; }
+            .numpad-row { gap: 6px; margin-bottom: 6px; }
+            .numpad-key { height: 50px; font-size: 22px; border-radius: 10px; }
+            .numpad-key.key-submit { font-size: 18px; }
+            .result-area { padding: 24px 16px; flex: 1; }
+            .footer { padding: 10px; }
+        }
+
+        @media (min-height: 800px) and (max-width: 520px) {
+            .numpad-key { height: 58px; }
+            .quiz-body { min-height: 180px; }
+        }
+
+        /* ===== 全屏模式 ===== */
+        .fullscreen-active .header,
+        .fullscreen-active .footer {
+            display: none;
+        }
+
+        .fullscreen-active {
+            border-radius: 0;
+            max-width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fullscreen-active .quiz-area {
+            flex: 1;
+        }
+
+        .fullscreen-active .quiz-body {
+            flex: 1;
+        }
+
+        .fullscreen-active .setup-panel {
+            flex: 1;
+        }
+
+        .fullscreen-active .result-area {
+            flex: 1;
+        }
+
+        body.is-fullscreen {
+            padding: 0;
+            background: white;
+        }
+
+        .btn-fullscreen {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            background: white;
+            color: #555;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-fullscreen:hover {
+            border-color: #f093fb;
+            color: #f5576c;
+        }
+
+        .btn-fullscreen:active {
+            transform: scale(0.98);
+        }
+
+        .exit-fullscreen-btn {
+            display: none;
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.06);
+            color: #999;
+            font-size: 18px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .exit-fullscreen-btn:hover {
+            background: rgba(0,0,0,0.1);
+            color: #666;
+        }
+
+        .fullscreen-active .exit-fullscreen-btn {
+            display: flex;
+        }
+
+        .quiz-top-bar {
+            position: relative;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border-radius: 0; }
+            .header, .setup-panel, .numpad, .footer { display: none; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🧮 口算速练</h1>
+            <p>快速口算训练，越算越聪明！</p>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">📝 笔画练习</a>
+                <a href="chaozi.html" class="nav-link">✍️ 抄字模式</a>
+                <a href="pinyin.html" class="nav-link">📖 文章注音</a>
+                <a href="mingtie.html" class="nav-link">🏷️ 姓名贴</a>
+            </div>
+        </header>
+
+        <!-- 设置区域 -->
+        <div class="setup-panel" id="setupPanel">
+            <div class="hint">
+                <strong>💡 使用说明：</strong>设置题型和操作数位数，点击开始后用下方数字键盘作答。适合手机和平板操作！
+            </div>
+
+            <div class="setup-section">
+                <div class="setup-section-title">题型设置</div>
+                <div class="setup-row">
+                    <div class="setup-item">
+                        <label>运算：</label>
+                        <select id="opType" onchange="onOpTypeChange()">
+                            <option value="add" selected>加法 +</option>
+                            <option value="sub">减法 −</option>
+                            <option value="mul">乘法 ×</option>
+                            <option value="div">除法 ÷</option>
+                            <option value="mix_as">加减混合</option>
+                            <option value="mix_md">乘除混合</option>
+                            <option value="mix_all">四则混合</option>
+                        </select>
+                    </div>
+                    <div class="setup-item">
+                        <label>题数：</label>
+                        <select id="questionCount">
+                            <option value="10">10题</option>
+                            <option value="20" selected>20题</option>
+                            <option value="30">30题</option>
+                            <option value="50">50题</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setup-section">
+                <div class="setup-section-title">位数配置</div>
+                <div class="digits-config">
+                    <select id="digitsA">
+                        <option value="1" selected>1位数</option>
+                        <option value="2">2位数</option>
+                        <option value="3">3位数</option>
+                    </select>
+                    <span class="op-symbol" id="opSymbolPreview">+</span>
+                    <select id="digitsB">
+                        <option value="1" selected>1位数</option>
+                        <option value="2">2位数</option>
+                        <option value="3">3位数</option>
+                    </select>
+                </div>
+                <div class="digits-preview" id="digitsPreview">例：5 + 3 = 8</div>
+            </div>
+
+            <div class="setup-section" id="carryBorrowSection" style="display:none;">
+                <div class="setup-section-title">进位/退位</div>
+                <div class="setup-row">
+                    <div class="setup-item" id="carryItem" style="display:none;">
+                        <label>进位：</label>
+                        <select id="carryMode">
+                            <option value="any" selected>不限</option>
+                            <option value="must">必须进位</option>
+                            <option value="none">不进位</option>
+                        </select>
+                    </div>
+                    <div class="setup-item" id="borrowItem" style="display:none;">
+                        <label>退位：</label>
+                        <select id="borrowMode">
+                            <option value="any" selected>不限</option>
+                            <option value="must">必须退位</option>
+                            <option value="none">不退位</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setup-section" id="subNegativeSection" style="display:none;">
+                <div class="setup-row">
+                    <div class="setup-item">
+                        <label>
+                            <input type="checkbox" id="allowNegative"> 允许负数结果（减法）
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setup-section">
+                <div class="setup-section-title">答题模式</div>
+                <div class="setup-row">
+                    <div class="setup-item">
+                        <label>错题处理：</label>
+                        <select id="wrongMode">
+                            <option value="skip" selected>显示答案，继续下一题</option>
+                            <option value="retry">不跳过，重新作答直到正确</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-start" onclick="startQuiz()">开始答题</button>
+            <button class="btn-fullscreen" onclick="toggleFullscreen()">⛶ 全屏模式</button>
+        </div>
+
+        <!-- 答题区域 -->
+        <div class="quiz-area" id="quizArea">
+            <div class="quiz-top-bar">
+                <button class="exit-fullscreen-btn" onclick="toggleFullscreen()" title="退出全屏">✕</button>
+                <div class="quiz-stat">
+                    <span class="quiz-stat-label">进度</span>
+                    <span class="quiz-stat-value" id="progressText">1/20</span>
+                </div>
+                <div class="quiz-stat">
+                    <span class="quiz-stat-label">正确</span>
+                    <span class="quiz-stat-value" style="color:#28a745" id="correctCount">0</span>
+                </div>
+                <div class="quiz-stat">
+                    <span class="quiz-stat-label">错误</span>
+                    <span class="quiz-stat-value" style="color:#dc3545" id="wrongCount">0</span>
+                </div>
+                <div class="quiz-stat">
+                    <span class="quiz-stat-label">用时</span>
+                    <span class="quiz-stat-value timer-value" id="timerDisplay">00:00</span>
+                </div>
+            </div>
+
+            <div class="progress-bar-wrap">
+                <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+            </div>
+
+            <div class="quiz-body">
+                <div class="question-display" id="questionDisplay"></div>
+                <div class="answer-display" id="answerDisplay"><span class="cursor-blink"></span></div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+
+            <div class="numpad" id="numpad">
+                <div class="numpad-row">
+                    <button class="numpad-key" onclick="numpadInput('7')">7</button>
+                    <button class="numpad-key" onclick="numpadInput('8')">8</button>
+                    <button class="numpad-key" onclick="numpadInput('9')">9</button>
+                </div>
+                <div class="numpad-row">
+                    <button class="numpad-key" onclick="numpadInput('4')">4</button>
+                    <button class="numpad-key" onclick="numpadInput('5')">5</button>
+                    <button class="numpad-key" onclick="numpadInput('6')">6</button>
+                </div>
+                <div class="numpad-row">
+                    <button class="numpad-key" onclick="numpadInput('1')">1</button>
+                    <button class="numpad-key" onclick="numpadInput('2')">2</button>
+                    <button class="numpad-key" onclick="numpadInput('3')">3</button>
+                </div>
+                <div class="numpad-row">
+                    <button class="numpad-key key-negative" id="keyNegative" onclick="numpadInput('-')" style="visibility:hidden;">+/−</button>
+                    <button class="numpad-key" onclick="numpadInput('0')">0</button>
+                    <button class="numpad-key key-back" onclick="numpadBack()">⌫</button>
+                </div>
+                <div class="numpad-row">
+                    <button class="numpad-key key-skip" id="keySkip" onclick="skipQuestion()">跳过</button>
+                    <button class="numpad-key key-clear" onclick="numpadClear()">清空</button>
+                    <button class="numpad-key key-submit" onclick="submitAnswer()">确定</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 结果区域 -->
+        <div class="result-area" id="resultArea">
+            <div class="result-emoji" id="resultEmoji"></div>
+            <div class="result-title" id="resultTitle"></div>
+            <div class="star-rating" id="starRating"></div>
+
+            <div class="result-cards">
+                <div class="result-card">
+                    <div class="result-card-label">正确率</div>
+                    <div class="result-card-value accuracy" id="resultAccuracy">0%</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-card-label">总用时</div>
+                    <div class="result-card-value time" id="resultTime">00:00</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-card-label">答对/总题</div>
+                    <div class="result-card-value total" id="resultTotal">0/0</div>
+                </div>
+            </div>
+
+            <div class="wrong-review" id="wrongReview"></div>
+
+            <div class="result-buttons">
+                <button class="btn-retry" onclick="retryQuiz()">再来一次</button>
+                <button class="btn-back" onclick="backToSetup()">返回设置</button>
+                <button class="btn-back" id="btnExitFs" onclick="toggleFullscreen()" style="display:none;">退出全屏</button>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <a href="https://github.com/caicaicai/miaozitie" target="_blank">GitHub: caicaicai/miaozitie</a>
+            &nbsp;|&nbsp; 专为小朋友设计的口算训练工具
+        </footer>
+    </div>
+
+    <script>
+        let questions = [];
+        let currentIndex = 0;
+        let correctTotal = 0;
+        let wrongList = [];
+        let timerInterval = null;
+        let startTime = 0;
+        let elapsedSeconds = 0;
+        let isSubmitting = false;
+        let currentAnswer = '';
+        let allowNegative = false;
+
+        // ===== 设置面板逻辑 =====
+
+        const OP_SYMBOLS = {
+            add: '+', sub: '−', mul: '×', div: '÷',
+            mix_as: '+/−', mix_md: '×/÷', mix_all: '+−×÷'
+        };
+
+        function onOpTypeChange() {
+            const op = document.getElementById('opType').value;
+            document.getElementById('opSymbolPreview').textContent = OP_SYMBOLS[op] || '+';
+
+            const negSection = document.getElementById('subNegativeSection');
+            negSection.style.display = (op === 'sub' || op === 'mix_as' || op === 'mix_all') ? '' : 'none';
+
+            const hasAdd = ['add', 'mix_as', 'mix_all'].includes(op);
+            const hasSub = ['sub', 'mix_as', 'mix_all'].includes(op);
+            const cbSection = document.getElementById('carryBorrowSection');
+            const carryItem = document.getElementById('carryItem');
+            const borrowItem = document.getElementById('borrowItem');
+            cbSection.style.display = (hasAdd || hasSub) ? '' : 'none';
+            carryItem.style.display = hasAdd ? '' : 'none';
+            borrowItem.style.display = hasSub ? '' : 'none';
+
+            const isMulDiv = (op === 'mul' || op === 'div' || op === 'mix_md');
+            const selA = document.getElementById('digitsA');
+            const selB = document.getElementById('digitsB');
+            if (isMulDiv) {
+                if (parseInt(selA.value) > 2) selA.value = '1';
+                if (parseInt(selB.value) > 2) selB.value = '1';
+                toggleOption(selA, '3', true);
+                toggleOption(selB, '3', true);
+            } else {
+                toggleOption(selA, '3', false);
+                toggleOption(selB, '3', false);
+            }
+            updateDigitsPreview();
+        }
+
+        function toggleOption(sel, val, disabled) {
+            const opt = sel.querySelector(`[value="${val}"]`);
+            if (opt) opt.disabled = disabled;
+        }
+
+        function updateDigitsPreview() {
+            const dA = parseInt(document.getElementById('digitsA').value);
+            const dB = parseInt(document.getElementById('digitsB').value);
+            const op = document.getElementById('opType').value;
+
+            const exA = exampleNum(dA);
+            const exB = exampleNum(dB);
+            const sym = op.startsWith('mix') ? OP_SYMBOLS[op].charAt(0) : OP_SYMBOLS[op];
+
+            let result;
+            if (sym === '+') result = exA + exB;
+            else if (sym === '−') result = exA - exB;
+            else if (sym === '×') result = exA * exB;
+            else result = Math.floor(exA / exB) || 1;
+
+            document.getElementById('digitsPreview').textContent = `例：${exA} ${sym} ${exB} = ${result}`;
+        }
+
+        function exampleNum(digits) {
+            if (digits === 1) return Math.floor(Math.random() * 8) + 2;
+            if (digits === 2) return Math.floor(Math.random() * 80) + 11;
+            return Math.floor(Math.random() * 800) + 101;
+        }
+
+        document.getElementById('digitsA').addEventListener('change', updateDigitsPreview);
+        document.getElementById('digitsB').addEventListener('change', updateDigitsPreview);
+        updateDigitsPreview();
+
+        // ===== 出题逻辑 =====
+
+        function randInRange(digits) {
+            if (digits === 1) return randInt(0, 9);
+            if (digits === 2) return randInt(10, 99);
+            return randInt(100, 999);
+        }
+
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        let carryMode = 'any';
+        let borrowMode = 'any';
+        let wrongMode = 'skip';
+
+        function hasCarry(a, b) {
+            let c = 0;
+            while (a > 0 || b > 0) {
+                const sum = (a % 10) + (b % 10) + c;
+                if (sum >= 10) return true;
+                c = 0;
+                a = Math.floor(a / 10);
+                b = Math.floor(b / 10);
+            }
+            return false;
+        }
+
+        function hasBorrow(a, b) {
+            if (a < b) { const t = a; a = b; b = t; }
+            let borrowed = 0;
+            while (a > 0 || b > 0) {
+                const da = (a % 10) - borrowed;
+                const db = b % 10;
+                if (da < db) return true;
+                borrowed = (da < db) ? 1 : 0;
+                a = Math.floor(a / 10);
+                b = Math.floor(b / 10);
+            }
+            return false;
+        }
+
+        function generateQuestions() {
+            const opType = document.getElementById('opType').value;
+            const count = parseInt(document.getElementById('questionCount').value);
+            const dA = parseInt(document.getElementById('digitsA').value);
+            const dB = parseInt(document.getElementById('digitsB').value);
+            allowNegative = document.getElementById('allowNegative').checked;
+            carryMode = document.getElementById('carryMode').value;
+            borrowMode = document.getElementById('borrowMode').value;
+            wrongMode = document.getElementById('wrongMode').value;
+
+            questions = [];
+            for (let i = 0; i < count; i++) {
+                questions.push(createQuestion(opType, dA, dB));
+            }
+        }
+
+        function getOps(opType) {
+            switch (opType) {
+                case 'add': return ['add'];
+                case 'sub': return ['sub'];
+                case 'mul': return ['mul'];
+                case 'div': return ['div'];
+                case 'mix_as': return ['add', 'sub'];
+                case 'mix_md': return ['mul', 'div'];
+                case 'mix_all': return ['add', 'sub', 'mul', 'div'];
+                default: return ['add'];
+            }
+        }
+
+        function createQuestion(opType, dA, dB) {
+            const ops = getOps(opType);
+            const op = ops[Math.floor(Math.random() * ops.length)];
+            return genQuestion(op, dA, dB);
+        }
+
+        function genQuestion(op, dA, dB) {
+            const MAX_TRIES = 200;
+            for (let attempt = 0; attempt < MAX_TRIES; attempt++) {
+                let a, b, answer, symbol;
+
+                switch (op) {
+                    case 'add':
+                        a = randInRange(dA);
+                        b = randInRange(dB);
+                        answer = a + b;
+                        symbol = '+';
+                        if (carryMode === 'must' && !hasCarry(a, b)) continue;
+                        if (carryMode === 'none' && hasCarry(a, b)) continue;
+                        break;
+
+                    case 'sub':
+                        a = randInRange(dA);
+                        b = randInRange(dB);
+                        if (!allowNegative && a < b) { const t = a; a = b; b = t; }
+                        answer = a - b;
+                        symbol = '−';
+                        if (borrowMode === 'must' && !hasBorrow(a, b)) continue;
+                        if (borrowMode === 'none' && hasBorrow(a, b)) continue;
+                        break;
+
+                    case 'mul':
+                        a = randInRange(dA);
+                        b = randInRange(dB);
+                        answer = a * b;
+                        symbol = '×';
+                        break;
+
+                    case 'div':
+                        b = randInRange(dB);
+                        if (b === 0) b = 1;
+                        answer = randInRange(dA);
+                        a = b * answer;
+                        symbol = '÷';
+                        break;
+                }
+
+                return { a, b, answer, symbol, text: `${a} ${symbol} ${b}` };
+            }
+            // 极端情况：约束过严无法满足，退回不受约束的题目
+            let a = randInRange(dA), b = randInRange(dB);
+            const symbol = op === 'add' ? '+' : '−';
+            if (op === 'sub' && !allowNegative && a < b) { const t = a; a = b; b = t; }
+            const answer = op === 'add' ? a + b : a - b;
+            return { a, b, answer, symbol, text: `${a} ${symbol} ${b}` };
+        }
+
+        // ===== 答题流程 =====
+
+        function startQuiz() {
+            generateQuestions();
+            currentIndex = 0;
+            correctTotal = 0;
+            wrongList = [];
+            elapsedSeconds = 0;
+            currentAnswer = '';
+
+            document.getElementById('setupPanel').style.display = 'none';
+            document.getElementById('resultArea').style.display = 'none';
+            document.getElementById('quizArea').style.display = 'flex';
+            document.getElementById('wrongCount').textContent = '0';
+
+            const showNeg = allowNegative;
+            document.getElementById('keyNegative').style.visibility = showNeg ? 'visible' : 'hidden';
+            document.getElementById('keySkip').textContent = wrongMode === 'retry' ? '提示' : '跳过';
+
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+            showQuestion();
+        }
+
+        function updateTimer() {
+            elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+            const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+            const s = String(elapsedSeconds % 60).padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+        }
+
+        function showQuestion() {
+            const q = questions[currentIndex];
+            const total = questions.length;
+
+            document.getElementById('progressText').textContent = `${currentIndex + 1}/${total}`;
+            document.getElementById('correctCount').textContent = correctTotal;
+            document.getElementById('progressBar').style.width = `${(currentIndex / total) * 100}%`;
+            document.getElementById('questionDisplay').innerHTML =
+                `${q.a} <span class="op">${q.symbol}</span> ${q.b} <span class="eq">=</span>`;
+
+            currentAnswer = '';
+            updateAnswerDisplay();
+            document.getElementById('feedback').textContent = '';
+        }
+
+        function updateAnswerDisplay() {
+            const el = document.getElementById('answerDisplay');
+            if (currentAnswer === '') {
+                el.innerHTML = '<span class="cursor-blink"></span>';
+            } else {
+                el.innerHTML = currentAnswer + '<span class="cursor-blink"></span>';
+            }
+            el.className = 'answer-display';
+        }
+
+        // ===== 虚拟键盘操作 =====
+
+        function numpadInput(ch) {
+            if (isSubmitting) return;
+            if (ch === '-') {
+                if (currentAnswer === '') {
+                    currentAnswer = '-';
+                } else if (currentAnswer === '-') {
+                    currentAnswer = '';
+                }
+            } else {
+                if (currentAnswer.replace('-', '').length >= 6) return;
+                currentAnswer += ch;
+            }
+            updateAnswerDisplay();
+        }
+
+        function numpadBack() {
+            if (isSubmitting) return;
+            if (currentAnswer.length > 0) {
+                currentAnswer = currentAnswer.slice(0, -1);
+                updateAnswerDisplay();
+            }
+        }
+
+        function numpadClear() {
+            if (isSubmitting) return;
+            currentAnswer = '';
+            updateAnswerDisplay();
+        }
+
+        function submitAnswer() {
+            if (isSubmitting) return;
+            if (currentAnswer === '' || currentAnswer === '-') return;
+
+            isSubmitting = true;
+            const q = questions[currentIndex];
+            const userAnswer = parseInt(currentAnswer);
+            const isCorrect = userAnswer === q.answer;
+            const el = document.getElementById('answerDisplay');
+            el.innerHTML = currentAnswer;
+
+            if (isCorrect) {
+                correctTotal++;
+                el.className = 'answer-display correct';
+                document.getElementById('feedback').textContent = '✅ 正确！';
+                document.getElementById('correctCount').textContent = correctTotal;
+
+                setTimeout(() => {
+                    isSubmitting = false;
+                    currentIndex++;
+                    if (currentIndex < questions.length) {
+                        showQuestion();
+                    } else {
+                        finishQuiz();
+                    }
+                }, 0);
+            } else {
+                el.className = 'answer-display wrong';
+
+                if (wrongMode === 'retry') {
+                    document.getElementById('feedback').textContent = '❌ 再想想！';
+                    if (!q._wrongLogged) {
+                        wrongList.push({ question: q.text, yourAnswer: userAnswer, correctAnswer: q.answer });
+                        q._wrongLogged = true;
+                        document.getElementById('wrongCount').textContent = wrongList.length;
+                    }
+                    setTimeout(() => {
+                        isSubmitting = false;
+                        currentAnswer = '';
+                        updateAnswerDisplay();
+                        document.getElementById('feedback').textContent = '';
+                    }, 600);
+                } else {
+                    document.getElementById('feedback').textContent = `❌ 答案是 ${q.answer}`;
+                    wrongList.push({ question: q.text, yourAnswer: userAnswer, correctAnswer: q.answer });
+                    document.getElementById('wrongCount').textContent = wrongList.length;
+
+                    setTimeout(() => {
+                        isSubmitting = false;
+                        currentIndex++;
+                        if (currentIndex < questions.length) {
+                            showQuestion();
+                        } else {
+                            finishQuiz();
+                        }
+                    }, 800);
+                }
+            }
+        }
+
+        function skipQuestion() {
+            if (isSubmitting) return;
+            const q = questions[currentIndex];
+
+            if (wrongMode === 'retry') {
+                if (!q._wrongLogged) {
+                    wrongList.push({ question: q.text, yourAnswer: '跳过', correctAnswer: q.answer });
+                    q._wrongLogged = true;
+                    document.getElementById('wrongCount').textContent = wrongList.length;
+                }
+                document.getElementById('feedback').textContent = `💡 答案是 ${q.answer}，再输入一遍吧`;
+                currentAnswer = '';
+                updateAnswerDisplay();
+                return;
+            }
+
+            wrongList.push({ question: q.text, yourAnswer: '跳过', correctAnswer: q.answer });
+            document.getElementById('wrongCount').textContent = wrongList.length;
+
+            const el = document.getElementById('answerDisplay');
+            el.innerHTML = '—';
+            el.className = 'answer-display wrong';
+            document.getElementById('feedback').textContent = `⏭️ 答案是 ${q.answer}`;
+
+            isSubmitting = true;
+            setTimeout(() => {
+                isSubmitting = false;
+                currentIndex++;
+                if (currentIndex < questions.length) {
+                    showQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }, 600);
+        }
+
+        // ===== 结果 =====
+
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            updateTimer();
+
+            document.getElementById('quizArea').style.display = 'none';
+            document.getElementById('resultArea').style.display = 'block';
+
+            const total = questions.length;
+            const accuracy = Math.round((correctTotal / total) * 100);
+            const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+            const s = String(elapsedSeconds % 60).padStart(2, '0');
+
+            let stars, emoji, title;
+            if (accuracy === 100) { stars = '⭐⭐⭐⭐⭐'; emoji = '🏆'; title = '太棒了！全部正确！'; }
+            else if (accuracy >= 90) { stars = '⭐⭐⭐⭐⭐'; emoji = '🎉'; title = '非常优秀！'; }
+            else if (accuracy >= 80) { stars = '⭐⭐⭐⭐'; emoji = '😊'; title = '表现不错！'; }
+            else if (accuracy >= 60) { stars = '⭐⭐⭐'; emoji = '💪'; title = '继续加油！'; }
+            else if (accuracy >= 40) { stars = '⭐⭐'; emoji = '📖'; title = '多多练习哦！'; }
+            else { stars = '⭐'; emoji = '🌱'; title = '慢慢来，你可以的！'; }
+
+            document.getElementById('resultEmoji').textContent = emoji;
+            document.getElementById('resultTitle').textContent = title;
+            document.getElementById('starRating').textContent = stars;
+            document.getElementById('resultAccuracy').textContent = accuracy + '%';
+            document.getElementById('resultTime').textContent = `${m}:${s}`;
+            document.getElementById('resultTotal').textContent = `${correctTotal}/${total}`;
+
+            const reviewDiv = document.getElementById('wrongReview');
+            if (wrongList.length > 0) {
+                let html = '<h3>📝 错题回顾</h3>';
+                wrongList.forEach(item => {
+                    html += `<div class="wrong-item">
+                        <span class="wrong-question">${item.question} = ?</span>
+                        <span class="wrong-answers">
+                            <span class="your-answer">${item.yourAnswer}</span>
+                            <span class="correct-answer">${item.correctAnswer}</span>
+                        </span>
+                    </div>`;
+                });
+                reviewDiv.innerHTML = html;
+            } else {
+                reviewDiv.innerHTML = '';
+            }
+        }
+
+        function retryQuiz() {
+            document.getElementById('resultArea').style.display = 'none';
+            startQuiz();
+        }
+
+        function backToSetup() {
+            clearInterval(timerInterval);
+            document.getElementById('quizArea').style.display = 'none';
+            document.getElementById('resultArea').style.display = 'none';
+            document.getElementById('setupPanel').style.display = 'block';
+        }
+
+        // ===== 全屏 =====
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                const el = document.documentElement;
+                const req = el.requestFullscreen || el.webkitRequestFullscreen;
+                if (req) req.call(el);
+            } else {
+                const exit = document.exitFullscreen || document.webkitExitFullscreen;
+                if (exit) exit.call(document);
+            }
+        }
+
+        function onFullscreenChange() {
+            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+            document.querySelector('.container').classList.toggle('fullscreen-active', isFs);
+            document.body.classList.toggle('is-fullscreen', isFs);
+            document.getElementById('btnExitFs').style.display = isFs ? '' : 'none';
+        }
+
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+
+        // ===== 物理键盘支持 =====
+        document.addEventListener('keydown', function (e) {
+            if (document.getElementById('quizArea').style.display !== 'flex') return;
+            if (e.key >= '0' && e.key <= '9') { numpadInput(e.key); e.preventDefault(); }
+            else if (e.key === 'Backspace') { numpadBack(); e.preventDefault(); }
+            else if (e.key === 'Enter') { submitAnswer(); e.preventDefault(); }
+            else if (e.key === 'Escape') { numpadClear(); e.preventDefault(); }
+            else if (e.key === '-') { numpadInput('-'); e.preventDefault(); }
+        });
+    </script>
+</body>
+
+</html>
