@@ -376,6 +376,7 @@
             max-width: 280px;
             aspect-ratio: 1;
             margin-bottom: 8px;
+            touch-action: none;
         }
 
         .handwrite-canvas {
@@ -455,6 +456,114 @@
         .hw-model-status.ready {
             color: #28a745;
         }
+
+        /* ===== 侧边键盘 ===== */
+        .sidepad {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .sidepad-col {
+            position: absolute;
+            top: 50px;
+            bottom: 60px;
+            width: 54px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding: 4px;
+            z-index: 2;
+        }
+
+        .sidepad-col.left { left: 0; }
+        .sidepad-col.right { right: 0; }
+
+        .sidepad-key {
+            flex: 1;
+            border: none;
+            border-radius: 8px;
+            background: #e9ecef;
+            color: #333;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+        }
+
+        .sidepad-key:active {
+            background: #667eea;
+            color: #fff;
+            transform: scale(0.95);
+        }
+
+        .sidepad-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            gap: 6px;
+            padding: 6px 60px;
+            background: rgba(248,249,250,0.95);
+            border-top: 1px solid #e0e0e0;
+            z-index: 2;
+        }
+
+        .sidepad-bottom button {
+            flex: 1;
+            padding: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .sidepad-bottom .sp-skip { background: #ffc107; color: #333; }
+        .sidepad-bottom .sp-clear { background: #e9ecef; color: #495057; }
+        .sidepad-bottom .sp-back { background: #e9ecef; color: #495057; }
+        .sidepad-bottom .sp-submit { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+
+        .sidepad-bottom button:active { transform: scale(0.95); }
+
+        .quiz-area.sidepad-active {
+            position: relative;
+        }
+
+        .quiz-area.sidepad-active > .quiz-body {
+            padding-left: 62px;
+            padding-right: 62px;
+            padding-bottom: 60px;
+        }
+
+        body.eye-care .sidepad-key {
+            background: #e0dace;
+            color: #3a3a2a;
+        }
+
+        body.eye-care .sidepad-key:active {
+            background: #8fb08a;
+            color: #fff;
+        }
+
+        body.eye-care .sidepad-bottom {
+            background: rgba(232,226,212,0.95);
+            border-top-color: #c0b8a0;
+        }
+
+        body.eye-care .sidepad-bottom .sp-skip { background: #e0dace; color: #6a6a5a; }
+        body.eye-care .sidepad-bottom .sp-clear { background: #e0dace; color: #4a4a3a; }
+        body.eye-care .sidepad-bottom .sp-back { background: #e0dace; color: #4a4a3a; }
+        body.eye-care .sidepad-bottom .sp-submit { background: linear-gradient(135deg, #a8c0a0, #8fb08a); }
 
         /* ===== 虚拟键盘 ===== */
         .numpad {
@@ -1319,6 +1428,7 @@
                         <label>输入方式：</label>
                         <select id="inputMode" onchange="onInputModeChange()">
                             <option value="numpad" selected>虚拟键盘</option>
+                            <option value="sidepad">侧边键盘</option>
                             <option value="handwrite">手写识别 ✍️</option>
                         </select>
                     </div>
@@ -1415,6 +1525,29 @@
                     <button class="hw-btn-undo" onclick="hwUndo()">⌫</button>
                     <button class="hw-btn-clear" onclick="hwClearCanvas()">清空</button>
                     <button class="hw-btn-confirm" onclick="submitAnswer()">确定</button>
+                </div>
+            </div>
+
+            <div class="sidepad" id="sidepad">
+                <div class="sidepad-col left">
+                    <button class="sidepad-key" onclick="numpadInput('1')">1</button>
+                    <button class="sidepad-key" onclick="numpadInput('2')">2</button>
+                    <button class="sidepad-key" onclick="numpadInput('3')">3</button>
+                    <button class="sidepad-key" onclick="numpadInput('4')">4</button>
+                    <button class="sidepad-key" onclick="numpadInput('5')">5</button>
+                </div>
+                <div class="sidepad-col right">
+                    <button class="sidepad-key" onclick="numpadInput('6')">6</button>
+                    <button class="sidepad-key" onclick="numpadInput('7')">7</button>
+                    <button class="sidepad-key" onclick="numpadInput('8')">8</button>
+                    <button class="sidepad-key" onclick="numpadInput('9')">9</button>
+                    <button class="sidepad-key" onclick="numpadInput('0')">0</button>
+                </div>
+                <div class="sidepad-bottom">
+                    <button class="sp-skip" id="spKeySkip" onclick="skipQuestion()">跳过</button>
+                    <button class="sp-back" onclick="numpadBack()">⌫</button>
+                    <button class="sp-clear" onclick="numpadClear()">清空</button>
+                    <button class="sp-submit" onclick="submitAnswer()">确定</button>
                 </div>
             </div>
         </div>
@@ -1695,8 +1828,10 @@
 
             const showNeg = allowNegative;
             document.getElementById('keyNegative').style.visibility = showNeg ? 'visible' : 'hidden';
-            document.getElementById('keySkip').textContent = wrongMode === 'retry' ? '提示' : '跳过';
-            document.getElementById('hwKeySkip').textContent = wrongMode === 'retry' ? '提示' : '跳过';
+            const skipText = wrongMode === 'retry' ? '提示' : '跳过';
+            document.getElementById('keySkip').textContent = skipText;
+            document.getElementById('hwKeySkip').textContent = skipText;
+            document.getElementById('spKeySkip').textContent = skipText;
 
             switchInputUI();
 
@@ -2073,10 +2208,12 @@
             hwCtx.lineJoin = 'round';
             hwCtx.strokeStyle = '#000';
 
-            canvas.addEventListener('pointerdown', hwPointerDown);
-            canvas.addEventListener('pointermove', hwPointerMove);
+            canvas.addEventListener('pointerdown', hwPointerDown, { passive: false });
+            canvas.addEventListener('pointermove', hwPointerMove, { passive: false });
             canvas.addEventListener('pointerup', hwPointerUp);
             canvas.addEventListener('pointerleave', hwPointerUp);
+            canvas.addEventListener('touchstart', function(e) { e.preventDefault(); }, { passive: false });
+            canvas.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
         }
 
         function hwPointerDown(e) {
@@ -2282,16 +2419,22 @@
         function switchInputUI() {
             const numpad = document.getElementById('numpad');
             const hwPad = document.getElementById('handwritePad');
+            const sidePad = document.getElementById('sidepad');
+            const quizArea = document.getElementById('quizArea');
+
+            numpad.style.display = 'none';
+            hwPad.style.display = 'none';
+            sidePad.style.display = 'none';
+            quizArea.classList.remove('sidepad-active');
 
             if (inputMode === 'handwrite') {
-                numpad.style.display = 'none';
                 hwPad.style.display = 'flex';
-                setTimeout(() => {
-                    initHwCanvas();
-                }, 50);
+                setTimeout(() => { initHwCanvas(); }, 50);
+            } else if (inputMode === 'sidepad') {
+                sidePad.style.display = 'block';
+                quizArea.classList.add('sidepad-active');
             } else {
                 numpad.style.display = 'block';
-                hwPad.style.display = 'none';
             }
         }
     </script>
