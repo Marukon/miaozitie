@@ -475,7 +475,7 @@
             position: absolute;
             top: 80px;
             bottom: 60px;
-            width: 54px;
+            width: 72px;
             display: flex;
             flex-direction: column;
             gap: 3px;
@@ -515,7 +515,7 @@
             right: 0;
             display: flex;
             gap: 6px;
-            padding: 6px 60px;
+            padding: 6px 80px;
             background: rgba(248,249,250,0.95);
             border-top: 1px solid #e0e0e0;
             z-index: 2;
@@ -544,8 +544,8 @@
         }
 
         .quiz-area.sidepad-active > .quiz-body {
-            padding-left: 62px;
-            padding-right: 62px;
+            padding-left: 80px;
+            padding-right: 80px;
             padding-bottom: 60px;
         }
 
@@ -2126,7 +2126,17 @@
         }
 
         // ===== 全屏 =====
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+        let isFakeFullscreen = false;
+
         function toggleFullscreen() {
+            if (isIOS) {
+                isFakeFullscreen = !isFakeFullscreen;
+                applyFullscreenState(isFakeFullscreen);
+                return;
+            }
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
                 const el = document.documentElement;
                 const req = el.requestFullscreen || el.webkitRequestFullscreen;
@@ -2137,16 +2147,19 @@
             }
         }
 
-        function onFullscreenChange() {
-            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        function applyFullscreenState(isFs) {
             document.querySelector('.container').classList.toggle('fullscreen-active', isFs);
             document.body.classList.toggle('is-fullscreen', isFs);
             document.getElementById('btnExitFs').style.display = isFs ? '' : 'none';
             const fsBtn = document.getElementById('btnToggleFs');
             if (fsBtn) {
-                fsBtn.textContent = isFs ? '⛶' : '⛶';
                 fsBtn.title = isFs ? '退出全屏' : '全屏';
             }
+        }
+
+        function onFullscreenChange() {
+            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+            applyFullscreenState(isFs);
         }
 
         document.addEventListener('fullscreenchange', onFullscreenChange);
