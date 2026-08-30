@@ -191,7 +191,7 @@
         .sticker-row {
             display: flex;
             align-items: flex-end;
-            font-family: "KaiTi", "楷体", STKaiti, serif;
+            font-family: var(--sticker-ff, "KaiTi", "楷体", STKaiti, serif);
             font-size: var(--sticker-font, 15pt);
         }
 
@@ -266,23 +266,40 @@
                 </div>
                 <div class="option-item">
                     <label for="inputWidth">贴纸宽：</label>
-                    <input type="number" id="inputWidth" value="35" min="20" max="90">
+                    <input type="number" id="inputWidth" value="40" min="20" max="90">
                     <span style="font-size: 14px; color: #666;">mm</span>
                 </div>
                 <div class="option-item">
                     <label for="inputHeight">贴纸高：</label>
-                    <input type="number" id="inputHeight" value="25" min="15" max="80">
+                    <input type="number" id="inputHeight" value="26" min="15" max="80">
                     <span style="font-size: 14px; color: #666;">mm</span>
                 </div>
                 <div class="option-item">
                     <label for="inputFontSize">字号：</label>
-                    <input type="number" id="inputFontSize" value="10" min="6" max="36" step="0.5" placeholder="自动" onchange="generateStickers()">
+                    <input type="number" id="inputFontSize" value="13" min="6" max="36" step="0.5" placeholder="自动" onchange="generateStickers()">
                     <span style="font-size: 14px; color: #666;">pt</span>
                 </div>
                 <div class="option-item">
                     <label for="inputCount">打印数量：</label>
                     <input type="number" id="inputCount" value="21" min="1" max="200">
                     <span id="pageHint" style="font-size: 14px; color: #666;">（一页21张，3列×7行）</span>
+                </div>
+                <div class="option-item">
+                    <label>字体：</label>
+                    <select id="fontFamily" onchange="generateStickers()" style="padding:10px 12px;border:2px solid #ddd;border-radius:8px;font-size:16px;">
+                        <option value='"KaiTi","楷体",STKaiti,serif'>楷体</option>
+                        <option value='"SimSun","宋体",STSong,serif'>宋体</option>
+                        <option value='"NSimSun","新宋体",serif'>新宋体</option>
+                        <option value='"STZhongsong","华文中宋",serif'>华文中宋</option>
+                        <option value='"STSong","华文宋体",serif'>华文宋体</option>
+                        <option value='"FZShuSong-Z01","方正书宋",serif'>方正书宋</option>
+                        <option value='"Microsoft YaHei","微软雅黑",sans-serif'>微软雅黑</option>
+                        <option value='"SimHei","黑体",STHeiti,sans-serif'>黑体</option>
+                        <option selected value='"FangSong","仿宋",STFangsong,serif'>仿宋</option>
+                        <option value='"LiSu","隶书",serif'>隶书</option>
+                        <option value='"YouYuan","幼圆",sans-serif'>幼圆</option>
+                        <option value='"STXingkai","华文行楷",cursive'>华文行楷</option>
+                    </select>
                 </div>
                 <div class="option-item">
                     <label>边框：</label>
@@ -405,9 +422,16 @@
             const userFont = parseFloat(document.getElementById('inputFontSize').value);
             const fontSize = (userFont && userFont >= 6) ? userFont : autoFont;
             container.style.setProperty('--sticker-font', fontSize + 'pt');
+            container.style.setProperty('--sticker-ff', document.getElementById('fontFamily').value);
             document.getElementById('inputFontSize').placeholder = autoFont + '(自动)';
-            container.style.setProperty('--sticker-px', (5 * scaleW).toFixed(1) + 'mm');
-            container.style.setProperty('--sticker-py', (4 * scaleH).toFixed(1) + 'mm');
+
+            const ptMM = 0.3528;
+            const textBlockH = 3 * fontSize * ptMM * 1.25;
+            const textBlockW = fontSize * ptMM * 7;
+            const py = Math.max(0, (h - textBlockH) * 0.2);
+            const px = Math.max(0, (w - textBlockW) * 0.2);
+            container.style.setProperty('--sticker-px', px.toFixed(1) + 'mm');
+            container.style.setProperty('--sticker-py', py.toFixed(1) + 'mm');
             container.style.setProperty('--sticker-radius', Math.max(2, 8 * scale).toFixed(0) + 'px');
 
             container.innerHTML = '';
