@@ -209,9 +209,9 @@
             border-bottom: 1.5px solid #333;
             text-align: center;
             color: #000;
-            padding: 0 2px 2px 2px;
+            padding: 0 2px;
             min-width: 20px;
-            line-height: 1.2;
+            line-height: 1;
             word-break: keep-all;
         }
 
@@ -275,6 +275,11 @@
                     <span style="font-size: 14px; color: #666;">mm</span>
                 </div>
                 <div class="option-item">
+                    <label for="inputFontSize">字号：</label>
+                    <input type="number" id="inputFontSize" value="10" min="6" max="36" step="0.5" placeholder="自动" onchange="generateStickers()">
+                    <span style="font-size: 14px; color: #666;">pt</span>
+                </div>
+                <div class="option-item">
                     <label for="inputCount">打印数量：</label>
                     <input type="number" id="inputCount" value="21" min="1" max="200">
                     <span id="pageHint" style="font-size: 14px; color: #666;">（一页21张，3列×7行）</span>
@@ -283,7 +288,7 @@
                     <label>边框：</label>
                     <select id="borderStyle" onchange="generateStickers()" style="padding:10px 12px;border:2px solid #ddd;border-radius:8px;font-size:16px;">
                         <option value="double">双线框</option>
-                        <option value="single">单线框</option>
+                        <option value="single" selected>单线框</option>
                         <option value="none">无边框</option>
                     </select>
                 </div>
@@ -396,7 +401,11 @@
             const scaleW = w / 55;
             const scaleH = h / 40;
             const scale = Math.min(scaleW, scaleH);
-            container.style.setProperty('--sticker-font', (15 * scale).toFixed(1) + 'pt');
+            const autoFont = parseFloat((15 * scale).toFixed(1));
+            const userFont = parseFloat(document.getElementById('inputFontSize').value);
+            const fontSize = (userFont && userFont >= 6) ? userFont : autoFont;
+            container.style.setProperty('--sticker-font', fontSize + 'pt');
+            document.getElementById('inputFontSize').placeholder = autoFont + '(自动)';
             container.style.setProperty('--sticker-px', (5 * scaleW).toFixed(1) + 'mm');
             container.style.setProperty('--sticker-py', (4 * scaleH).toFixed(1) + 'mm');
             container.style.setProperty('--sticker-radius', Math.max(2, 8 * scale).toFixed(0) + 'px');
