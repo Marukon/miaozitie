@@ -127,25 +127,46 @@
             width: 210mm;
             min-height: 297mm;
             background: white;
-            padding: 12mm;
+            padding: 10mm;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-auto-rows: 40mm;
-            gap: 6mm 8mm;
+            grid-template-columns: repeat(var(--cols, 3), var(--sticker-w, 35mm));
+            grid-auto-rows: var(--sticker-h, 25mm);
+            gap: 3mm 4mm;
             align-content: start;
+            position: relative;
+        }
+
+        .cut-line {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .cut-line-v {
+            top: 0;
+            bottom: 0;
+            width: 0;
+            border-left: 1px dashed #bbb;
+        }
+        .cut-line-h {
+            left: 0;
+            right: 0;
+            height: 0;
+            border-top: 1px dashed #bbb;
         }
 
         .sticker {
             border: 2px solid #333;
-            border-radius: 8px;
-            padding: 4mm 5mm;
+            border-radius: var(--sticker-radius, 8px);
+            padding: var(--sticker-py, 4mm) var(--sticker-px, 5mm);
             display: flex;
             flex-direction: column;
             justify-content: space-evenly;
             background: white;
             box-sizing: border-box;
             position: relative;
+            overflow: hidden;
+            z-index: 1;
         }
         
         .sticker::after {
@@ -156,15 +177,26 @@
             right: 2px;
             bottom: 2px;
             border: 1px solid #777;
-            border-radius: 5px;
+            border-radius: calc(var(--sticker-radius, 8px) - 2px);
             pointer-events: none;
         }
+
+        .sticker.border-single::after { display: none; }
+
+        .sticker.border-none {
+            border-color: transparent;
+        }
+        .sticker.border-none::after { display: none; }
 
         .sticker-row {
             display: flex;
             align-items: flex-end;
-            font-family: "KaiTi", "楷体", STKaiti, serif;
-            font-size: 15pt;
+            font-family: var(--sticker-ff, "KaiTi", "楷体", STKaiti, serif);
+            font-size: var(--sticker-font, 15pt);
+        }
+
+        .sticker.text-bold .sticker-row {
+            font-weight: bold;
         }
 
         .sticker-label {
@@ -177,9 +209,9 @@
             border-bottom: 1.5px solid #333;
             text-align: center;
             color: #000;
-            padding: 0 2px 2px 2px;
+            padding: 0 2px;
             min-width: 20px;
-            line-height: 1.2;
+            line-height: 1;
             word-break: keep-all;
         }
 
@@ -192,7 +224,6 @@
                 width: 210mm; 
                 min-height: 297mm; 
                 box-shadow: none; 
-                padding: 12mm; 
                 margin: 0; 
                 page-break-after: always;
             }
@@ -206,7 +237,7 @@
         @media (max-width: 768px) {
             .a4-page {
                 width: 100%;
-                grid-template-columns: repeat(auto-fill, minmax(60mm, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(var(--sticker-w, 55mm), 1fr));
             }
         }
     </style>
@@ -234,9 +265,61 @@
                     <input type="text" id="inputId" placeholder="7">
                 </div>
                 <div class="option-item">
+                    <label for="inputWidth">贴纸宽：</label>
+                    <input type="number" id="inputWidth" value="40" min="20" max="90">
+                    <span style="font-size: 14px; color: #666;">mm</span>
+                </div>
+                <div class="option-item">
+                    <label for="inputHeight">贴纸高：</label>
+                    <input type="number" id="inputHeight" value="26" min="15" max="80">
+                    <span style="font-size: 14px; color: #666;">mm</span>
+                </div>
+                <div class="option-item">
+                    <label for="inputFontSize">字号：</label>
+                    <input type="number" id="inputFontSize" value="13" min="6" max="36" step="0.5" placeholder="自动" onchange="generateStickers()">
+                    <span style="font-size: 14px; color: #666;">pt</span>
+                </div>
+                <div class="option-item">
                     <label for="inputCount">打印数量：</label>
-                    <input type="number" id="inputCount" value="21" min="1" max="100">
-                    <span style="font-size: 14px; color: #666;">（一页默认21张，3列×7行）</span>
+                    <input type="number" id="inputCount" value="21" min="1" max="200">
+                    <span id="pageHint" style="font-size: 14px; color: #666;">（一页21张，3列×7行）</span>
+                </div>
+                <div class="option-item">
+                    <label>字体：</label>
+                    <select id="fontFamily" onchange="generateStickers()" style="padding:10px 12px;border:2px solid #ddd;border-radius:8px;font-size:16px;">
+                        <option value='"KaiTi","楷体",STKaiti,serif'>楷体</option>
+                        <option value='"SimSun","宋体",STSong,serif'>宋体</option>
+                        <option value='"NSimSun","新宋体",serif'>新宋体</option>
+                        <option value='"STZhongsong","华文中宋",serif'>华文中宋</option>
+                        <option value='"STSong","华文宋体",serif'>华文宋体</option>
+                        <option value='"FZShuSong-Z01","方正书宋",serif'>方正书宋</option>
+                        <option value='"Microsoft YaHei","微软雅黑",sans-serif'>微软雅黑</option>
+                        <option value='"SimHei","黑体",STHeiti,sans-serif'>黑体</option>
+                        <option selected value='"FangSong","仿宋",STFangsong,serif'>仿宋</option>
+                        <option value='"LiSu","隶书",serif'>隶书</option>
+                        <option value='"YouYuan","幼圆",sans-serif'>幼圆</option>
+                        <option value='"STXingkai","华文行楷",cursive'>华文行楷</option>
+                    </select>
+                </div>
+                <div class="option-item">
+                    <label>边框：</label>
+                    <select id="borderStyle" onchange="generateStickers()" style="padding:10px 12px;border:2px solid #ddd;border-radius:8px;font-size:16px;">
+                        <option value="double">双线框</option>
+                        <option value="single" selected>单线框</option>
+                        <option value="none">无边框</option>
+                    </select>
+                </div>
+                <div class="option-item">
+                    <label for="boldText" style="cursor:pointer;">
+                        <input type="checkbox" id="boldText" checked onchange="generateStickers()" style="width:18px;height:18px;cursor:pointer;vertical-align:middle;">
+                        文字加粗
+                    </label>
+                </div>
+                <div class="option-item">
+                    <label for="cutLines" style="cursor:pointer;">
+                        <input type="checkbox" id="cutLines" checked onchange="generateStickers()" style="width:18px;height:18px;cursor:pointer;vertical-align:middle;">
+                        裁切线
+                    </label>
                 </div>
             </div>
 
@@ -261,50 +344,136 @@
     </div>
 
     <script>
-        function generateStickers() {
-            let stuClass = document.getElementById('inputClass').value;
-            let stuName = document.getElementById('inputName').value;
-            let stuId = document.getElementById('inputId').value;
-            let count = parseInt(document.getElementById('inputCount').value);
-            
-            if (stuClass.trim() === '') stuClass = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-            if (stuName.trim() === '') stuName = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-            if (stuId.trim() === '') stuId = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-            
-            if (isNaN(count) || count < 1) count = 21;
+        const PAGE_CONTENT_W = 190; // 210mm - 10mm*2 padding
+        const PAGE_CONTENT_H = 277; // 297mm - 10mm*2 padding
+        const GAP_X = 4;  // mm
+        const GAP_Y = 3;  // mm
 
-            const container = document.getElementById('stickerContainer');
-            container.innerHTML = '';
+        function calcLayout(w, h) {
+            let cols = 1;
+            while ((cols + 1) * w + cols * GAP_X <= PAGE_CONTENT_W) cols++;
+            let rows = 1;
+            while ((rows + 1) * h + rows * GAP_Y <= PAGE_CONTENT_H) rows++;
+            return { cols, rows, perPage: cols * rows };
+        }
 
-            for (let i = 0; i < count; i++) {
-                const sticker = document.createElement('div');
-                sticker.className = 'sticker';
-                
-                sticker.innerHTML = `
-                    <div class="sticker-row">
-                        <span class="sticker-label">班级：</span>
-                        <span class="sticker-value">${stuClass}</span>
-                    </div>
-                    <div class="sticker-row">
-                        <span class="sticker-label">姓名：</span>
-                        <span class="sticker-value">${stuName}</span>
-                    </div>
-                    <div class="sticker-row">
-                        <span class="sticker-label">学号：</span>
-                        <span class="sticker-value">${stuId}</span>
-                    </div>
-                `;
-                
-                container.appendChild(sticker);
+        function updateHint() {
+            const w = parseInt(document.getElementById('inputWidth').value) || 55;
+            const h = parseInt(document.getElementById('inputHeight').value) || 40;
+            const { cols, rows, perPage } = calcLayout(w, h);
+            document.getElementById('pageHint').textContent =
+                `（一页${perPage}张，${cols}列×${rows}行）`;
+            document.getElementById('inputCount').value = perPage;
+        }
+
+        function generateCutLines(container, w, h, cols, count, padLeft, padTop) {
+            const usedRows = Math.ceil(count / cols);
+            const halfGX = GAP_X / 2;
+            const halfGY = GAP_Y / 2;
+            const totalGridW = cols * w + (cols - 1) * GAP_X;
+            const totalGridH = usedRows * h + (usedRows - 1) * GAP_Y;
+
+            for (let c = 0; c <= cols; c++) {
+                const x = (c === 0)    ? padLeft - halfGX
+                        : (c === cols) ? padLeft + totalGridW + halfGX
+                        : padLeft + c * (w + GAP_X) - halfGX;
+                const line = document.createElement('div');
+                line.className = 'cut-line cut-line-v';
+                line.style.left = x + 'mm';
+                container.appendChild(line);
+            }
+
+            for (let r = 0; r <= usedRows; r++) {
+                const y = (r === 0)        ? padTop - halfGY
+                        : (r === usedRows) ? padTop + totalGridH + halfGY
+                        : padTop + r * (h + GAP_Y) - halfGY;
+                const line = document.createElement('div');
+                line.className = 'cut-line cut-line-h';
+                line.style.top = y + 'mm';
+                container.appendChild(line);
             }
         }
 
-        // 初始页面加载默认填充并生成
+        function generateStickers() {
+            const stuClass = document.getElementById('inputClass').value.trim() || null;
+            const stuName = document.getElementById('inputName').value.trim() || null;
+            const stuId = document.getElementById('inputId').value.trim() || null;
+            const w = parseInt(document.getElementById('inputWidth').value) || 55;
+            const h = parseInt(document.getElementById('inputHeight').value) || 40;
+            let count = parseInt(document.getElementById('inputCount').value);
+            const { cols } = calcLayout(w, h);
+
+            if (isNaN(count) || count < 1) count = cols * 7;
+
+            const container = document.getElementById('stickerContainer');
+            container.style.setProperty('--sticker-w', w + 'mm');
+            container.style.setProperty('--sticker-h', h + 'mm');
+            container.style.setProperty('--cols', cols);
+
+            const totalGridW = cols * w + (cols - 1) * GAP_X;
+            const padLR = (210 - totalGridW) / 2;
+            const padTop = 10;
+            container.style.padding = padTop + 'mm ' + padLR + 'mm';
+
+            const scaleW = w / 55;
+            const scaleH = h / 40;
+            const scale = Math.min(scaleW, scaleH);
+            const autoFont = parseFloat((15 * scale).toFixed(1));
+            const userFont = parseFloat(document.getElementById('inputFontSize').value);
+            const fontSize = (userFont && userFont >= 6) ? userFont : autoFont;
+            container.style.setProperty('--sticker-font', fontSize + 'pt');
+            container.style.setProperty('--sticker-ff', document.getElementById('fontFamily').value);
+            document.getElementById('inputFontSize').placeholder = autoFont + '(自动)';
+
+            const ptMM = 0.3528;
+            const textBlockH = 3 * fontSize * ptMM * 1.25;
+            const textBlockW = fontSize * ptMM * 7;
+            const py = Math.max(0, (h - textBlockH) * 0.2);
+            const px = Math.max(0, (w - textBlockW) * 0.2);
+            container.style.setProperty('--sticker-px', px.toFixed(1) + 'mm');
+            container.style.setProperty('--sticker-py', py.toFixed(1) + 'mm');
+            container.style.setProperty('--sticker-radius', Math.max(2, 8 * scale).toFixed(0) + 'px');
+
+            container.innerHTML = '';
+
+            const borderVal = document.getElementById('borderStyle').value;
+            const borderCls = borderVal === 'single' ? ' border-single' : borderVal === 'none' ? ' border-none' : '';
+            const boldCls = document.getElementById('boldText').checked ? ' text-bold' : '';
+            const blank = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+            for (let i = 0; i < count; i++) {
+                const sticker = document.createElement('div');
+                sticker.className = 'sticker' + borderCls + boldCls;
+                sticker.innerHTML = `
+                    <div class="sticker-row">
+                        <span class="sticker-label">班级：</span>
+                        <span class="sticker-value">${stuClass || blank}</span>
+                    </div>
+                    <div class="sticker-row">
+                        <span class="sticker-label">姓名：</span>
+                        <span class="sticker-value">${stuName || blank}</span>
+                    </div>
+                    <div class="sticker-row">
+                        <span class="sticker-label">学号：</span>
+                        <span class="sticker-value">${stuId || blank}</span>
+                    </div>
+                `;
+                container.appendChild(sticker);
+            }
+
+            if (document.getElementById('cutLines').checked) {
+                generateCutLines(container, w, h, cols, count, padLR, padTop);
+            }
+        }
+
         window.onload = () => {
             document.getElementById('inputClass').value = '一（2）班';
-            document.getElementById('inputName').value = '蔡孝妍';
+            document.getElementById('inputName').value = '蔡 孝 妍';
             document.getElementById('inputId').value = '23';
+            updateHint();
             generateStickers();
+
+            document.getElementById('inputWidth').addEventListener('change', () => { updateHint(); generateStickers(); });
+            document.getElementById('inputHeight').addEventListener('change', () => { updateHint(); generateStickers(); });
         };
     </script>
 </body>
